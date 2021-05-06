@@ -1,13 +1,14 @@
 /**
- * autopayout-validators.js
+ * autopayout.js
  *  
- * Claim and distribute validator staking rewards for your stakers
- * 
- * Accepts several validators in config.js file
+ * Claim and distribute validator staking rewards for your stakers in Reef Finance
  *
- * https://github.com/Colm3na/polkadot-auto-payout
+ * https://github.com/jimiflowers/reef-validator-auto-payout
  * 
  * Author: Mario Pino | @mariopino:matrix.org
+ *
+ * Adapted by: Jimi Flowers | @polkaflow:matrix.org
+ *
  */
 
 const BigNumber = require('bignumber.js');
@@ -20,7 +21,7 @@ const fs = require('fs');
 const prompts = require('prompts');
 const yargs = require('yargs');
 const config = require('./config.js');
-const { types } = require('@sora-substrate/types');
+const { types } = require('@reef-substrate/types');
 
 const argv = yargs
   .scriptName("autopayout.js")
@@ -63,6 +64,7 @@ const main = async () => {
   console.log("\n\x1b[45m\x1b[1m Substrate auto payout \x1b[0m\n");
   console.log("\x1b[1m - Check source at https://github.com/Colm3na/substrate-auto-payout\x1b[0m");
   console.log("\x1b[32m\x1b[1m - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/\x1b[0m\n");
+  console.log("\x1b[32m\x1b[1m - Adapted to Reef Finance by Jimi Flowers https://polkaflow.io/\x1b[0m\n");
 
   let raw;
   try {
@@ -136,7 +138,7 @@ const main = async () => {
       // Claim rewards tx
       const nonce = (await api.derive.balances.account(address)).accountNonce
       const hash = await api.tx.utility.batch(transactions).signAndSend(signer, { nonce });
-      console.log(`\n\x1b[32m\x1b[1mSuccess! \x1b[37mCheck tx in PolkaScan: https://polkascan.io/kusama/transaction/${hash.toString()}\x1b[0m\n`);
+      console.log(`\n\x1b[32m\x1b[1mSuccess! \x1b[37mCheck tx in Polkadot-js app: https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frpc-testnet.reefscan.com#/explorer/query/${blockHash}\x1b[0m\n`);
       if (log) {
         fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${hash.toString()}\n`);
       }
