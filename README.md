@@ -1,8 +1,8 @@
 # Substrate validator auto payout
 
-Claim and distribute validator staking rewards for your stakers automagically in SORA Substrate blockchain.
+Claim and distribute validator staking rewards for your stakers automagically in Reef Finance Substrate blockchain.
 
-Made with ❤️ from ColmenaLabs_SVQ! and adapted to SORA-XOR Network by Jimi Flowers
+Made with ❤️ from ColmenaLabs_SVQ! and adapted to Reef Finance by Jimi Flowers
 
 ## Install
 
@@ -11,8 +11,8 @@ Needs nodejs (>= v10.20.1), check https://nodejs.org/en/download/ to install for
 Clone the repository and install the needed dependencies:
 
 ```
-git clone https://github.com/jimiflowers/sora-xor-validator-auto-payout.git
-cd sora-xor-validator-auto-payout
+git clone https://github.com/jimiflowers/reef-validator-auto-payout.git
+cd reef-validator-auto-payout
 yarn
 ```
 
@@ -42,8 +42,8 @@ Example output:
 ```
  Substrate auto payout
 
- - Check source at https://github.com/jimiflowers/sora-xor-validator-auto-payout
- - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/ and adapted to SORA-XOR Network by Jimi Flowers
+ - Check source at https://github.com/jimiflowers/reef-validator-auto-payout
+ - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/ and adapted to Reef Finance by Jimi Flowers
 
  -> Validator stash address is GTzRQPzkcuynHgkEHhsPBFpKdh4sAacVRsnd8vYfPpTMeEY
  -> Importing account FndLuNiewT7uDSB1Ucr3TQHm5vDvZsHfYV3eHivyB8FBAwF
@@ -53,7 +53,7 @@ Example output:
  -> Claimed eras: [1645,1646,1647,1648,1649,1650,1651,1652,1653,1654,1655,1656,1657,1658,1659,1660,1661,1662,1663,1664,1665,1666,1667,1668,1669,1670,1671,1672,1673,1674,1675,1676,1677,1678,1679,1680,1681,1682,1683,1684,1685,1686,1687,1688,1689,1690,1691,1692,1693,1694,1695,1696,1697,1698,1699,1700,1701,1702,1703,1704,1705,1706,1707,1708,1709,1710,1711,1712,1713,1714,1715,1716,1717,1718,1719,1721,1722,1723,1724,1725,1726,1727,1728]
  -> Unclaimed eras: [1720,1729]
 
-Success! Check tx in PolkaScan: https://polkascan.io/kusama/transaction/0xdb63b74e971d9164fb28678eb7114f5feaeeee9ff760d7dec1acb981060ecdf2
+Success! Check tx in PolkaScan: https://polkascan.io/reef/transaction/0xdb63b74e971d9164fb28678eb7114f5feaeeee9ff760d7dec1acb981060ecdf2
 
 ```
 
