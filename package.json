@@ -1,0 +1,34 @@
+{
+  "name": "substrate-auto-payout",
+  "version": "1.0.0",
+  "description": "Auto payout script for Substrate based blockchains Polkadot, Kusama and Westend",
+  "main": "autopayout.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/Colm3na/substrate-auto-payout"
+  },
+  "keywords": [
+    "blockchain",
+    "substrate",
+    "polkadot",
+    "kusama",
+    "westend",
+    "validator",
+    "POS"
+  ],
+  "author": "mariopino",
+  "license": "GPL-3.0-only",
+  "dependencies": {
+    "@polkadot/api": "^v4.6.2",
+    "@polkadot/ui-keyring": "^0.74.1",
+    "@polkadot/ui-settings": "^0.74.1",
+    "@sora-substrate/type-definitions": "^0.8.12",
+    "@sora-substrate/types": "^0.8.12",
+    "bignumber.js": "^9.0.1",
+    "prompts": "^2.4.0",
+    "yargs": "^16.2.0"
+  }
+}
