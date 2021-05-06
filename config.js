@@ -1,9 +1,9 @@
 module.exports = {
-  nodeWS: 'wss://ws.stage.sora2.soramitsu.co.jp',
-  denom: 'XOR',
+  nodeWS: 'wss://rpc-testnet.reefscan.com/ws',
+  denom: 'REEF',
   decimalPlaces: 18,
-  validator: 'cnSDmUSu3Ab4cfccMxySzxxQSZM6oxUCVkW4UdDezcswoTRs2', // SORAFLOWER 🏵/01
-  password: 'j4im3.fl0',
-  accountJSON: './keystores/soraflower01.json',
+  validator: 'YOUR_STASH_ACCOUNT', // VALIDATOR_NAME
+  password: 'YOUR_PASSWORD',
+  accountJSON: './keystores/YOUR_KEYSTORE_FILE.json',
   log: true,
 }
