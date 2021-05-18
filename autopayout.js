@@ -1,16 +1,15 @@
 /**
  * autopayout.js
- *  
+ *
  * Claim and distribute validator staking rewards for your stakers in Reef Finance
  *
  * https://github.com/jimiflowers/reef-validator-auto-payout
- * 
+ *
  * Author: Mario Pino | @mariopino:matrix.org
  *
  * Adapted by: Jimi Flowers | @polkaflow:matrix.org
  *
  */
-
 const BigNumber = require('bignumber.js');
 const { ApiPromise, WsProvider } = require('@polkadot/api');
 const keyring = require('@polkadot/ui-keyring').default;
@@ -22,7 +21,7 @@ const fs = require('fs');
 const prompts = require('prompts');
 const yargs = require('yargs');
 const config = require('./config.js');
-const { types } = require('@reef-substrate/types');
+const { types } = require('@reef-defi/types');
 
 const argv = yargs
   .scriptName("autopayout.js")
@@ -71,9 +70,9 @@ const wsProvider = config.nodeWS;
 const main = async () => {
 
   console.log("\n\x1b[45m\x1b[1m Reef Finance auto payout \x1b[0m\n");
-  console.log("\x1b[1m - Check source at https://github.com/jimiflowers/reef-validator-auto-payout\x1b[0m");
+  console.log("\x1b[1m - Check source at https://github.com/jimiflowers/reef-validator-auto-payout\x1b[0m\n");
   console.log("\x1b[32m\x1b[1m - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/\x1b[0m\n");
-  console.log("\x1b[32m\x1b[1m - Adapted to Reef Finance by Jimi Flowers https://polkaflow.io/\x1b[0m\n");
+  console.log("\x1b[32m\x1b[1m - Adapted to Reef Finance Network by Jimi Flowers https://polkaflow.io/\x1b[0m\n");
 
   let raw;
   try {
@@ -92,7 +91,7 @@ const main = async () => {
   } else {
     console.log(`\x1b[1m -> Validator stash address is\x1b[0m`, validator);
   }
-  
+
   // Prompt user to enter password
   if (!password) {
     const response = await prompts({
@@ -105,7 +104,7 @@ const main = async () => {
 
   if (password) {
     console.log(`\x1b[1m -> Importing account\x1b[0m`, address);
-    const signer = keyring.restoreAccount(account, password); 
+    const signer = keyring.restoreAccount(account, password);
     signer.decodePkcs8(password);
 
     // Connect to node
@@ -122,12 +121,11 @@ const main = async () => {
     }
     console.log(`\x1b[1m -> Account ${address} available balance is ${availableBalance.toHuman()}\x1b[0m`);
 
-
     // Get session progress info
     const chainActiveEra = await api.query.staking.activeEra();
     const activeEra = JSON.parse(JSON.stringify(chainActiveEra)).index;
     console.log(`\x1b[1m -> Active era is ${activeEra}\x1b[0m`);
-  
+
     // Check validator unclaimed rewards
     const stakingInfo = await api.derive.staking.account(validator);
     const claimedRewards = stakingInfo.stakingLedger.claimedRewards;
@@ -145,30 +143,33 @@ const main = async () => {
         unclaimedRewards.push(era);
       }
     }
+
     if (transactions.length > 0) {
       console.log(`\x1b[1m -> Unclaimed eras: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
-      // Claim rewards tx
-      const nonce = (await api.derive.balances.account(address)).accountNonce;
-      let blockHash = null;
-      let extrinsicHash = null;
+      var nonce = await api.rpc.system.accountNextIndex(address);
+      let blockHash = [];
+      let extrinsicHash = [];
       let extrinsicStatus = null;
-      await api.tx.utility.batch(transactions)
-        .signAndSend(
-          signer,
-          { nonce },
-          ({ events = [], status }) => {
-            extrinsicStatus = status.type
-            if (status.isInBlock) {
-              extrinsicHash = status.asInBlock.toHex()
-            } else if (status.isFinalized) {
-              blockHash = status.asFinalized.toHex()
-            }
-          }
-        )
-      console.log(`\n\x1b[32m\x1b[1mSuccess! \x1b[37mCheck tx in Polkadot-js app: https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frpc-testnet.reefscan.com#/explorer/query/${blockHash}\x1b[0m\n`);
-      if (log) {
-        fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${extrinsicHash}`);
+      for (let index = 0; index < unclaimedRewards.length; index++) {
+	console.log(`\x1b[1m -> Processing Payout for Era: ${unclaimedRewards[index]}\x1b[0m`);
+	await api.tx.staking.payoutStakers(validator,unclaimedRewards[index])
+              .signAndSend(signer,{ nonce },({ status }) => {
+               	 extrinsicStatus = status.type
+                 if (status.isInBlock) {
+                    extrinsicHash.push = status.asInBlock.toHex()
+                 } else if (status.isFinalized) {
+                    blockHash.push = status.asFinalized.toHex()
+                 }
+              })
+	nonce = await api.rpc.system.accountNextIndex(address);
+        console.log(`\n\x1b[32m\x1b[1m\x1b[1m -> Success! \x1b[37mCheck tx in Polkadot-js app: https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frpc-testnet.reefscan.com#/explorer/query/${blockHash[index]}\x1b[0m\n`);
+
+	if (log) {
+           fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${extrinsicHash[index]}`);
+      	}
+
       }
+
     } else {
       console.log(`\n\x1b[33m\x1b[1mWarning! There'r no unclaimed rewards, exiting!\x1b[0m\n`);
     }
