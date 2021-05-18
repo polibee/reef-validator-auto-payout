@@ -1,4 +1,4 @@
-# Reef Network validator auto payout
+# Reef Finance Network validator auto payout
 
 Claim and distribute validator staking rewards for your stakers automagically in Reef Finance Substrate blockchain.
 
