@@ -45,15 +45,15 @@ Example output:
  - Check source at https://github.com/FlowerStake/reef-validator-auto-payout
  - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/ and adapted to Reef Finance by Jimi Flowers
 
- -> Validator stash address is GTzRQPzkcuynHgkEHhsPBFpKdh4sAacVRsnd8vYfPpTMeEY
- -> Importing account FndLuNiewT7uDSB1Ucr3TQHm5vDvZsHfYV3eHivyB8FBAwF
- -> Connecting to wss://kusama-rpc.polkadot.io
- -> Account FndLuNiewT7uDSB1Ucr3TQHm5vDvZsHfYV3eHivyB8FBAwF free balance is 0.558 KSM
- -> Current era is 1730
- -> Unclaimed eras: [1720,1729]
- -> Paying Era: 1720
+ -> Validator stash address is 5CDo1enKQhb7EXYh91yfANuxRS7VdEfuHb8SxQRvw173jpPd
+ -> Importing account 5G6qCzHmfKgk9W5QBidVndsbhXQ2PvfUDu1YKuizqfDP7j3y
+ -> Connecting to wss://rpc-testnet.reefscan.com
+ -> Account 5G6qCzHmfKgk9W5QBidVndsbhXQ2PvfUDu1YKuizqfDP7j3y free balance is 10.58 kREEF
+ -> Current era is 730
+ -> Unclaimed eras: [720,729]
+ -> Paying Era: 720
          Payout Success!
- -> Paying Era: 1729
+ -> Paying Era: 729
          Payout Success!
 
 ```
