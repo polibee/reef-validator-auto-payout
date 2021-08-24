@@ -42,7 +42,7 @@ Example output:
 ```
  Substrate auto payout
 
- - Check source at https://github.com/jimiflowers/reef-validator-auto-payout
+ - Check source at https://github.com/FlowerStake/reef-validator-auto-payout
  - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/ and adapted to Reef Finance by Jimi Flowers
 
  -> Validator stash address is GTzRQPzkcuynHgkEHhsPBFpKdh4sAacVRsnd8vYfPpTMeEY
