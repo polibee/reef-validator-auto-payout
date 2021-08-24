@@ -70,9 +70,9 @@ const wsProvider = config.nodeWS;
 const main = async () => {
 
   console.log("\n\x1b[45m\x1b[1m Reef Finance auto payout \x1b[0m\n");
-  console.log("\x1b[1m - Check source at https://github.com/jimiflowers/reef-validator-auto-payout\x1b[0m\n");
+  console.log("\x1b[1m - Check source at https://github.com/FlowerStake/reef-validator-auto-payout\x1b[0m\n");
   console.log("\x1b[32m\x1b[1m - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/\x1b[0m\n");
-  console.log("\x1b[32m\x1b[1m - Adapted to Reef Finance Network by Jimi Flowers https://polkaflow.io/\x1b[0m\n");
+  console.log("\x1b[32m\x1b[1m - Adapted to Reef Chain by Jimi Flowers https://flowerstake.io/\x1b[0m\n");
 
   let raw;
   try {
@@ -119,17 +119,16 @@ const main = async () => {
       console.log(`\x1b[31m\x1b[1mError! Account ${address} doesn't have available funds\x1b[0m\n`);
       process.exit(1);
     }
-    console.log(`\x1b[1m -> Account ${address} available balance is ${availableBalance.toHuman()}\x1b[0m`);
+    console.log(`\x1b[1m -> Account ${address} available balance is \x1b[0m\x1b[1;32m${availableBalance.toHuman()}\x1b[0m`);
 
     // Get session progress info
     const chainActiveEra = await api.query.staking.activeEra();
     const activeEra = JSON.parse(JSON.stringify(chainActiveEra)).index;
-    console.log(`\x1b[1m -> Active era is ${activeEra}\x1b[0m`);
+    console.log(`\x1b[1m -> Active era is \x1b[0m\x1b[1;32m${activeEra}\x1b[0m`);
 
     // Check validator unclaimed rewards
     const stakingInfo = await api.derive.staking.account(validator);
     const claimedRewards = stakingInfo.stakingLedger.claimedRewards;
-    console.log(`\x1b[1m -> Claimed eras: ${JSON.stringify(claimedRewards)}\x1b[0m`);
 
     let transactions = [];
     let unclaimedRewards = [];
@@ -144,14 +143,23 @@ const main = async () => {
       }
     }
 
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const date_string = year + "/" + month + "/" + day + " " + hours + ":" + minutes + ":" + seconds;
+
     if (transactions.length > 0) {
-      console.log(`\x1b[1m -> Unclaimed eras: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
+      console.log(`\x1b[1m -> Unclaimed eras: \x1b[0m\x1b[1;31m${JSON.stringify(unclaimedRewards)}\x1b[0m`);
       var nonce = await api.rpc.system.accountNextIndex(address);
       let blockHash = [];
       let extrinsicHash = [];
       let extrinsicStatus = null;
       for (let index = 0; index < unclaimedRewards.length; index++) {
-	console.log(`\x1b[1m -> Processing Payout for Era: ${unclaimedRewards[index]}\x1b[0m`);
+	console.log(`\x1b[1m -> Processing Payout for Era: \x1b[0m\x1b[1;33m${unclaimedRewards[index]}\x1b[0m`);
 	await api.tx.staking.payoutStakers(validator,unclaimedRewards[index])
               .signAndSend(signer,{ nonce },({ status }) => {
                	 extrinsicStatus = status.type
@@ -162,16 +170,14 @@ const main = async () => {
                  }
               })
 	nonce = await api.rpc.system.accountNextIndex(address);
-        console.log(`\n\x1b[32m\x1b[1m\x1b[1m -> Success! \x1b[37mCheck tx in Polkadot-js app: https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frpc-testnet.reefscan.com#/explorer/query/${blockHash[index]}\x1b[0m\n`);
-
-	if (log) {
-           fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${extrinsicHash[index]}`);
-      	}
+        console.log(`\t\x1b[1;32mPayout Success!\x1b[0m\n`);
+        fs.appendFileSync(`/var/log/autopayout.log`, `${date_string} - Claimed rewards for Era ${unclaimedRewards[index]}`);
 
       }
 
     } else {
-      console.log(`\n\x1b[33m\x1b[1mWarning! There'r no unclaimed rewards, exiting!\x1b[0m\n`);
+      console.log(`\n\x1b[33m\x1b[1mWarning! There are no unclaimed rewards, exiting!\x1b[0m\n`);
+      fs.appendFileSync(`/var/log/autopayout.log`, `${date_string} - Warning! There are no unclaimed rewards, exiting!\n`);
     }
     process.exit(0);
   }

@@ -20,8 +20,8 @@ keyring.initKeyring({
 const fs = require('fs');
 const prompts = require('prompts');
 const yargs = require('yargs');
-const config = require('./config.js');
-const { types } = require('@reef-substrate/types');
+const config = require('./config_multi.js');
+const { types } = require('@reef-defi/types');
 
 const argv = yargs
   .scriptName("autopayout.js")
@@ -61,10 +61,10 @@ const wsProvider = config.nodeWS;
 
 const main = async () => {
 
-  console.log("\n\x1b[45m\x1b[1m Substrate auto payout \x1b[0m\n");
-  console.log("\x1b[1m - Check source at https://github.com/Colm3na/substrate-auto-payout\x1b[0m");
+  console.log("\n\x1b[45m\x1b[1m Reef validator auto payout \x1b[0m\n");
+  console.log("\x1b[1m - Check source at https://github.com/FlowerStake/reef-validator-auto-payout\x1b[0m");
   console.log("\x1b[32m\x1b[1m - Made with love from ColmenaLabs_SVQ https://colmenalabs.org/\x1b[0m\n");
-  console.log("\x1b[32m\x1b[1m - Adapted to Reef Finance by Jimi Flowers https://polkaflow.io/\x1b[0m\n");
+  console.log("\x1b[32m\x1b[1m - Adapted to Reef Chain by Jimi Flowers https://flowerstake.io/\x1b[0m\n");
 
   let raw;
   try {
@@ -95,58 +95,79 @@ const main = async () => {
     // Connect to node
     console.log(`\x1b[1m -> Connecting to\x1b[0m`, wsProvider);
     const provider = new WsProvider(wsProvider);
-    const api = await ApiPromise.create({ provider });
+    const api = await ApiPromise.create({ provider, types });
 
     // Check account balance
-    const accountBalance = await api.query.system.account(address)
-    const totalBalance = accountBalance.data.free
-    const freeBalance = BigNumber(totalBalance.toString()).minus(
-      accountBalance.data.miscFrozen.toString()
-    )
-    if (freeBalance === 0) {
-      console.log(`\x1b[31m\x1b[1mError! Account ${address} doesn't have free funds\x1b[0m\n`);
+    const accountBalance = await api.derive.balances.all(address);
+    const availableBalance = accountBalance.availableBalance;
+    if (availableBalance.eq(0)) {
+      console.log(`\x1b[31m\x1b[1mError! Account ${address} doesn't have available funds\x1b[0m\n`);
       process.exit(1);
     }
-    console.log(`\x1b[1m -> Account ${address} free balance is ${(new BigNumber(freeBalance).div(new BigNumber(10).pow(config.decimalPlaces))).toFixed(3)} ${config.denom}\x1b[0m`);
+    console.log(`\x1b[1m -> Account ${address} available balance is \x1b[0m\x1b[1;32m${availableBalance.toHuman()}\x1b[0m`);
 
     // Get session progress info
     const chainActiveEra = await api.query.staking.activeEra();
     const activeEra = JSON.parse(JSON.stringify(chainActiveEra)).index;
-    console.log(`\x1b[1m -> Active era is ${activeEra}\x1b[0m`);
-
+    console.log(`\x1b[1m -> Active era is \x1b[0m\x1b[1;32m${activeEra}\x1b[0m`);
     let transactions = [];
+    let unclaimedRewards = {};
 
     for (let index = 0; index < config.validators.length; index++) {
-      const validator = config.validators[index];
-      let unclaimedRewards = [];
-      let era = activeEra - 84;
-      const stakingInfo = await api.derive.staking.account(validator);
+      const validator_address = config.validators[index][0];
+      const validator_name = config.validators[index][1];
+      unclaimedRewards[validator_name] = [];
+      let era = activeEra > 84 ? activeEra - 84 : 0;
+      const stakingInfo = await api.derive.staking.account(validator_address);
       const claimedRewards = stakingInfo.stakingLedger.claimedRewards;
-      console.log(`\x1b[1m -> Claimed eras for validator ${validator}: ${JSON.stringify(claimedRewards)}\x1b[0m`);
+      //console.log(`\x1b[1m -> Claimed eras for ${validator_name}: \x1b[32m${JSON.stringify(claimedRewards)}\x1b[0m`);
       for (era; era < activeEra; era++) {
         const eraPoints = await api.query.staking.erasRewardPoints(era);
         const eraValidators = Object.keys(eraPoints.individual.toHuman());
-        if (eraValidators.includes(validator) && !claimedRewards.includes(era)) {
-          transactions.push(api.tx.staking.payoutStakers(validator, era));
-          unclaimedRewards.push(era);
+        if (eraValidators.includes(validator_address) && !claimedRewards.includes(era)) {
+          transactions.push(api.tx.staking.payoutStakers(validator_address, era));
+          unclaimedRewards[validator_name].push(era);
         }
       }
-      console.log(`\x1b[1m -> Unclaimed eras for validator ${validator}: ${JSON.stringify(unclaimedRewards)}\x1b[0m`);
+      console.log(`\n\x1b[1m -> Unclaimed eras for \x1b[44m\x1b[1;33m${validator_name}\x1b[0m\x1b[1m: \x1b[0m\x1b[1;33m${unclaimedRewards[validator_name].length}\x1b[0m\x1b[1;31m ${JSON.stringify(unclaimedRewards[validator_name])}\x1b[0m`);
     }
 
-    if (transactions.length > 0) {
-      // Claim rewards tx
-      const nonce = (await api.derive.balances.account(address)).accountNonce
-      const hash = await api.tx.utility.batch(transactions).signAndSend(signer, { nonce });
-      console.log(`\n\x1b[32m\x1b[1mSuccess! \x1b[37mCheck tx in Polkadot-js app: https://polkadot.js.org/apps/?rpc=wss%3A%2F%2Frpc-testnet.reefscan.com#/explorer/query/${blockHash}\x1b[0m\n`);
-      if (log) {
-        fs.appendFileSync(`autopayout.log`, `${new Date()} - Claimed rewards, transaction hash is ${hash.toString()}\n`);
-      }
-    } else {
-      console.log(`\n\x1b[33m\x1b[1mWarning! There's no unclaimed rewards, exiting!\x1b[0m\n`);
-      if (log) {
-        fs.appendFileSync(`autopayout.log`, `${new Date()} - There's no unclaimed rewards\n`);
-      }
+    for (let index = 0; index < config.validators.length; index++) {
+         const validator_address = config.validators[index][0];
+	 const validator_name = config.validators[index][1];
+         const date = new Date();
+         const year = date.getFullYear();
+         const month = date.getMonth() + 1;
+         const day = date.getDate();
+         const hours = date.getHours();
+         const minutes = date.getMinutes();
+         const seconds = date.getSeconds();
+         const date_string = year + "/" + month + "/" + day + " " + hours + ":" + minutes + ":" + seconds;
+	 if (unclaimedRewards[validator_name].length > 0) {
+            var nonce = await api.rpc.system.accountNextIndex(address);
+            let blockHash = [];
+            let extrinsicHash = [];
+            let extrinsicStatus = null;
+	    console.log(`\n\n\x1b[1m -> Processing \x1b[0m\x1b[1;33m${unclaimedRewards[validator_name].length}\x1b[0m\x1b[1m Pending Payouts for \x1b[44m\x1b[1;33m${validator_name}\x1b[0m`);
+            for (let index = 0; index < unclaimedRewards[validator_name].length; index++) {
+               console.log(`\n\t\x1b\x1b[1m -> Paying Era: ${unclaimedRewards[validator_name][index]}\x1b[0m`);
+               await api.tx.staking.payoutStakers(validator_address,unclaimedRewards[validator_name][index])
+                 .signAndSend(signer,{ nonce },({ status }) => {
+                    extrinsicStatus = status.type
+                    if (status.isInBlock) {
+                       extrinsicHash.push = status.asInBlock.toHex()
+                    } else if (status.isFinalized) {
+                       blockHash.push = status.asFinalized.toHex()
+                    }
+                 })
+              nonce = await api.rpc.system.accountNextIndex(address);
+              console.log(`\t\x1b[1;32m Payout Success!\x1b[0m`);
+              fs.appendFileSync(`/var/log/autopayout_multiple.log`, `${date_string} - Validator ${validator_name}: Claimed rewards for Era ${unclaimedRewards[validator_name][index]}, transaction hash is ${extrinsicHash[index]}`);
+	    }
+         } else {
+            console.log(`\n\x1b[1;33m\x1b[1mWarning! There are no unclaimed rewards for \x1b[0m\x1b[1;33m\x1b[41m${validator_name}!\x1b[0m\n`);
+            fs.appendFileSync(`/var/log/autopayout_multiple.log`, `${date_string} - There are no unclaimed rewards for ${validator_name}\n`);
+         }
     }
     process.exit(0);
   }

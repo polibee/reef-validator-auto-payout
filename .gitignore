@@ -6,7 +6,7 @@ node_modules/
 # Logs & Key #
 ######################
 *.log
-keystores/reef-test-stash.json
+keystores/*.json
 
 # Compiled source #
 ###################

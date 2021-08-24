@@ -27,6 +27,7 @@
     "@polkadot/ui-settings": "^0.74.1",
     "@reef-defi/type-definitions": "^0.1.4",
     "@reef-defi/types": "^0.1.4",
+    "bignumber": "^1.1.0",
     "bignumber.js": "^9.0.1",
     "prompts": "^2.4.0",
     "yargs": "^16.2.0"
