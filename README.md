@@ -11,7 +11,7 @@ Needs nodejs (>= v10.20.1), check https://nodejs.org/en/download/ to install for
 Clone the repository and install the needed dependencies:
 
 ```
-git clone https://github.com/jimiflowers/reef-validator-auto-payout.git
+git clone https://github.com/FlowerStake/reef-validator-auto-payout.git
 cd reef-validator-auto-payout
 yarn
 ```
