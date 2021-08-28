@@ -171,7 +171,7 @@ const main = async () => {
               })
 	nonce = await api.rpc.system.accountNextIndex(address);
         console.log(`\t\x1b[1;32mPayout Success!\x1b[0m\n`);
-        fs.appendFileSync(`/var/log/autopayout.log`, `${date_string} - Claimed rewards for Era ${unclaimedRewards[index]}`);
+        fs.appendFileSync(`/var/log/autopayout.log`, `${date_string} - Claimed rewards for Era ${unclaimedRewards[index]}\n`);
 
       }
 
